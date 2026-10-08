@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Form Quiz · Autumn Week 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#12103a; --bg2:#1d1a52; --card:#ffffff; --ink:#15132e; --muted:#6b6a86;
+  --gold:#ffc83d; --good:#1fbf75; --bad:#e8455a;
+  --a:#e21b3c; --b:#1368ce; --c:#d89e00; --d:#26890c;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Outfit,system-ui,-apple-system,Segoe UI,sans-serif;background:radial-gradient(circle at 20% 0%,var(--bg2),var(--bg) 60%);color:#fff;min-height:100vh}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:1200px;margin:0 auto;padding:20px 24px;min-height:100vh;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:22px;letter-spacing:.3px}
+.brand small{display:block;font-weight:400;font-size:13px;opacity:.7;letter-spacing:0}
+.spacer{flex:1}
+.pill{background:rgba(255,255,255,.12);border-radius:999px;padding:8px 16px;font-weight:600;font-size:16px}
+.pill.score{background:var(--gold);color:var(--ink)}
+.screen{display:none;flex:1;flex-direction:column}
+.screen.on{display:flex}
+
+/* start */
+.start{align-items:center;justify-content:center;text-align:center;gap:18px}
+.start h1{font-size:clamp(34px,6vw,64px);margin:0;line-height:1.05}
+.start p{margin:0;opacity:.8;font-size:18px;max-width:640px}
+.panel{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px;min-width:min(420px,100%)}
+label{font-size:14px;opacity:.8;text-align:left}
+select{font-family:inherit;font-size:22px;padding:12px;border-radius:12px;border:0;width:100%;font-weight:600}
+.seg{display:flex;gap:8px}
+.seg button{flex:1;border:0;border-radius:10px;padding:10px;font-size:16px;font-weight:600;background:rgba(255,255,255,.15);color:#fff}
+.seg button.on{background:#fff;color:var(--ink)}
+.go{border:0;border-radius:14px;padding:16px 28px;font-size:22px;font-weight:800;background:var(--gold);color:var(--ink)}
+.go:disabled{opacity:.4;cursor:not-allowed}
+.hint{font-size:14px;opacity:.65}
+.mix{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.mix span{background:rgba(255,255,255,.1);padding:6px 12px;border-radius:999px;font-size:14px}
+
+/* question */
+.qhead{display:flex;align-items:center;gap:12px;margin:18px 0 10px}
+.cat{background:#fff;color:var(--ink);border-radius:8px;padding:5px 12px;font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.6px}
+.prog{flex:1;height:8px;background:rgba(255,255,255,.12);border-radius:8px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--gold);width:0}
+.qcard{background:var(--card);color:var(--ink);border-radius:18px;padding:28px 32px;font-size:clamp(24px,3.4vw,40px);font-weight:600;line-height:1.25;text-align:center;min-height:150px;display:flex;align-items:center;justify-content:center}
+.timer{height:10px;background:rgba(255,255,255,.12);border-radius:10px;margin:14px 0;overflow:hidden}
+.timer i{display:block;height:100%;background:#fff;width:100%;transition:width 1s linear}
+.timer.low i{background:var(--bad)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:14px;flex:1;min-height:220px}
+.opt{border:0;border-radius:14px;color:#fff;font-size:clamp(18px,2.4vw,28px);font-weight:600;text-align:left;padding:16px 20px;display:flex;align-items:center;gap:16px;box-shadow:inset 0 -6px 0 rgba(0,0,0,.2);transition:opacity .2s,transform .1s}
+.opt:hover{transform:translateY(-2px)}
+.opt .sh{flex:none;width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px}
+.opt[data-i="0"]{background:var(--a)} .opt[data-i="1"]{background:var(--b)}
+.opt[data-i="2"]{background:var(--c)} .opt[data-i="3"]{background:var(--d)}
+.opt.dim{opacity:.25}
+.opt.right{outline:6px solid #fff;opacity:1}
+.opt.picked{outline:6px dashed #fff}
+.opt:disabled{cursor:default;transform:none}
+.foot{display:flex;align-items:center;gap:14px;margin-top:14px;min-height:74px}
+.verdict{font-size:26px;font-weight:800}
+.verdict.good{color:var(--good)} .verdict.bad{color:var(--bad)}
+.fact{flex:1;font-size:17px;opacity:.9;line-height:1.35}
+.btn{border:0;border-radius:12px;padding:14px 22px;font-size:18px;font-weight:800;background:#fff;color:var(--ink)}
+.btn.ghost{background:rgba(255,255,255,.14);color:#fff}
+
+/* end */
+.end{align-items:center;text-align:center;gap:16px;padding-top:20px}
+.big{font-size:clamp(70px,14vw,160px);font-weight:800;line-height:1;color:var(--gold)}
+.big small{font-size:.35em;color:#fff;opacity:.7}
+.status{font-size:18px;padding:12px 18px;border-radius:12px;background:rgba(255,255,255,.1)}
+.status.ok{background:rgba(31,191,117,.2);color:#9ff2c8}
+.status.err{background:rgba(232,69,90,.2);color:#ffb3bd}
+.review{width:100%;max-width:900px;text-align:left;background:rgba(255,255,255,.06);border-radius:14px;padding:6px 16px;margin-top:10px}
+.review div{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:15px}
+.review div:last-child{border:0}
+.review b{flex:none;width:26px}
+.review .t{flex:1}
+.review .ans{opacity:.7}
+.ok-c{color:var(--good)} .no-c{color:var(--bad)}
+.keys{font-size:13px;opacity:.5;text-align:center;margin-top:10px}
+@media (max-width:640px){.opts{grid-template-columns:1fr}.qcard{padding:20px}.wrap{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">Sixth Form Quiz<small id="subtitle">Autumn Term 2026 · Week 2</small></div>
+    <div class="spacer"></div>
+    <div class="pill" id="formPill" hidden></div>
+    <div class="pill score" id="scorePill" hidden>0 pts</div>
+  </div>
+
+  <!-- START -->
+  <section class="screen start on" id="sStart">
+    <h1>Week 2 Quiz</h1>
+    <p>30 questions: mostly A level subjects, plus some cultural capital. You have 30 seconds to discuss each question as a form, then your tutor clicks the form's answer. 1 point per correct answer.</p>
+    <div class="mix"><span>24 × A level subjects</span><span>6 × Cultural capital</span></div>
+    <div class="panel">
+      <label for="formSel">Form</label>
+      <select id="formSel"><option value="">Choose your form…</option></select>
+      <div class="hint">Every form gets 30 seconds per question. When time runs out the answer is shown and no point is scored.</div>
+      <button class="go" id="goBtn" disabled>Start the quiz</button>
+      <div class="hint" id="startHint">The score saves to the leaderboard automatically at the end.</div>
+    </div>
+  </section>
+
+  <!-- QUESTION -->
+  <section class="screen" id="sQ">
+    <div class="qhead"><span class="cat" id="qCat"></span><span class="pill" id="qNum"></span><div class="prog"><i id="qProg"></i></div></div>
+    <div class="qcard" id="qText"></div>
+    <div class="timer" id="timer"><i id="timerBar"></i></div>
+    <div class="opts" id="opts"></div>
+    <div class="foot" id="foot">
+      <div class="fact hint" id="footHint">Click the form's answer (or press 1–4). Press R to reveal without an answer.</div>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section class="screen end" id="sEnd">
+    <div class="pill" id="endForm"></div>
+    <div class="big" id="endScore">0<small> / 30</small></div>
+    <div class="status" id="saveStatus">Saving to the leaderboard…</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <button class="btn ghost" id="retryBtn" hidden>Try saving again</button>
+      <button class="btn ghost" id="copyBtn">Copy result</button>
+    </div>
+    <div class="review" id="review"></div>
+  </section>
+  <div class="keys">Keys: 1–4 choose · R reveal · Space / Enter next</div>
+</div>
+
+<script>
+/* ============ CONFIG ============ */
+const CLOUD = { endpoint:"https://vestigia-store.mrbeasley930.workers.dev", book:"sfquiz27b" };
+const QUIZ  = { term:"autumn26", termName:"Autumn Term 2026", week:2, id:"autumn26-w2", title:"Week 2" };
+const YEARS = {
+  "Year 12": ["12ABB","12AHS","12EEL","12IKW","12KLS","12SNH","12SSS","12TRW","12WJS"],
+  "Year 13": ["13ARB","13BMC","13CAH","13DJS","13MJH","13RCW","13RPE","13SAS","13SMO"]
+};
+const FORMS = Object.values(YEARS).flat();
+
+/* ============ QUESTIONS ============
+   a = index of the correct option as written. Options are shuffled on screen
+   unless keep:true (used where the options are an ordered number scale). */
+const QUESTIONS = [
+ {cat:"Maths", q:"What is ∫ <sup>1</sup>⁄<sub>x</sub> dx?",
+  opts:["ln|x| + c","−x<sup>−2</sup> + c","x<sup>0</sup> + c","e<sup>x</sup> + c"], a:0,
+  fact:"It is the one power of x the reverse power rule cannot handle, because dividing by n + 1 would mean dividing by zero."},
+ {cat:"Biology", q:"Where in the cell does the Krebs cycle take place?",
+  opts:["The mitochondrial matrix","The cristae (inner mitochondrial membrane)","The cytoplasm","The stroma of the chloroplast"], a:0,
+  fact:"The link reaction happens in the matrix too. Oxidative phosphorylation happens on the cristae, and glycolysis in the cytoplasm."},
+ {cat:"Chemistry", q:"What is the bond angle in a methane (CH<sub>4</sub>) molecule?",
+  opts:["90°","104.5°","109.5°","120°"], a:2, keep:true,
+  fact:"Four bonding pairs repel equally, giving a tetrahedral shape. Water is 104.5° because its two lone pairs repel more strongly."},
+ {cat:"Physics", q:"An isotope has a half-life of 6 hours. What fraction of it is left after 24 hours?",
+  opts:["<sup>1</sup>⁄<sub>4</sub>","<sup>1</sup>⁄<sub>8</sub>","<sup>1</sup>⁄<sub>16</sub>","<sup>1</sup>⁄<sub>32</sub>"], a:2, keep:true,
+  fact:"24 hours is 4 half-lives, so (½)<sup>4</sup> = <sup>1</sup>⁄<sub>16</sub> remains."},
+ {cat:"Psychology", q:"Which model of memory has a central executive, a phonological loop and a visuo-spatial sketchpad?",
+  opts:["The working memory model","The multi-store model","Levels of processing","Reconstructive memory"], a:0,
+  fact:"Baddeley and Hitch proposed it in 1974. Baddeley added a fourth part, the episodic buffer, in 2000."},
+ {cat:"Cultural capital", q:"The word 'salary' comes from the Latin word for which substance?",
+  opts:["Salt","Silver","Grain","Olive oil"], a:0,
+  fact:"Latin <i>salarium</i> comes from <i>sal</i>, 'salt'. The popular story that Roman soldiers were paid in salt has no ancient evidence behind it."},
+ {cat:"Economics", q:"A good has a price elasticity of demand of −0.4. Its demand is…",
+  opts:["Price inelastic","Price elastic","Unit elastic","Perfectly elastic"], a:0,
+  fact:"Ignoring the sign, the value is below 1, so quantity changes proportionally less than price. Raising the price raises total revenue."},
+ {cat:"Geography", q:"In the water cycle, what is the term for water soaking into the soil from the surface?",
+  opts:["Infiltration","Percolation","Throughflow","Interception"], a:0,
+  fact:"Throughflow is water moving sideways through the soil. Percolation is water moving down from the soil into the rock below."},
+ {cat:"History", q:"In the October Revolution of 1917, which building did the Bolsheviks seize from the Provisional Government?",
+  opts:["The Winter Palace","The Kremlin","The Tauride Palace","Peterhof"], a:0,
+  fact:"Russia still used the old Julian calendar, so the 'October' Revolution was 7 November in the modern calendar."},
+ {cat:"English Literature", q:"In <i>The Great Gatsby</i>, what colour is the light at the end of Daisy's dock?",
+  opts:["Green","Red","White","Blue"], a:0,
+  fact:"Gatsby reaches out towards it in Chapter 1. The novel was published in 1925 and is narrated by Nick Carraway."},
+ {cat:"Politics", q:"Since 2009, what has been the highest court of appeal in the UK?",
+  opts:["The Supreme Court","The House of Lords","The Privy Council","The Court of Appeal"], a:0,
+  fact:"The Constitutional Reform Act 2005 moved the top court out of the House of Lords, where the 'Law Lords' had sat."},
+ {cat:"Cultural capital", q:"Which author of <i>The Lord of the Rings</i> grew up in Birmingham and went to King Edward's School?",
+  opts:["J.R.R. Tolkien","C.S. Lewis","Roald Dahl","Philip Pullman"], a:0,
+  fact:"King Edward's School is part of our own King Edward VI Foundation. Sarehole Mill in Hall Green, near Tolkien's childhood home, is often said to have inspired the Shire."},
+ {cat:"Philosophy & RS", q:"Which philosopher said we should act only on a maxim we could will to become a universal law?",
+  opts:["Immanuel Kant","Jeremy Bentham","John Stuart Mill","Aristotle"], a:0,
+  fact:"This is the first formulation of Kant's categorical imperative, from the <i>Groundwork of the Metaphysics of Morals</i> (1785)."},
+ {cat:"Computer Science", q:"What must be true of a list before you can run a binary search on it?",
+  opts:["It must be sorted","It must have an even number of items","It must contain only integers","It must have no repeated items"], a:0,
+  fact:"Each step halves the list, so a sorted list of a million items needs at most 20 comparisons."},
+ {cat:"French", q:"Which French tense is formed with <i>avoir</i> or <i>être</i> plus a past participle?",
+  opts:["The passé composé","The imparfait","The futur simple","The conditionnel"], a:0,
+  fact:"Most verbs take <i>avoir</i>. Verbs of movement such as <i>aller</i>, <i>venir</i> and <i>partir</i>, and all reflexive verbs, take <i>être</i>."},
+ {cat:"Classics", q:"In Homer's <i>Odyssey</i>, what is the name of the old dog who recognises Odysseus when he comes home?",
+  opts:["Argos","Cerberus","Laelaps","Sirius"], a:0,
+  fact:"In Book 17 Argos lies neglected on a dung heap, wags his tail at his master after twenty years, and dies."},
+ {cat:"Further Maths", q:"If i is the imaginary unit, what is i<sup>2</sup>?",
+  opts:["−1","1","i","−i"], a:0,
+  fact:"Euler's identity, e<sup>iπ</sup> + 1 = 0, links e, i, π, 1 and 0 in one equation."},
+ {cat:"Cultural capital", q:"Who painted the ceiling of the Sistine Chapel in the Vatican?",
+  opts:["Michelangelo","Leonardo da Vinci","Raphael","Caravaggio"], a:0,
+  fact:"He painted it between 1508 and 1512, standing on scaffolding rather than lying on his back. He thought of himself as a sculptor first."},
+ {cat:"Biology", q:"What is the net yield of ATP from glycolysis for one molecule of glucose?",
+  opts:["1","2","4","36"], a:1, keep:true,
+  fact:"Glycolysis makes 4 ATP but uses 2 to get started, so the net gain is 2. It also produces 2 reduced NAD."},
+ {cat:"Chemistry", q:"Which type of reaction turns an alcohol into an alkene?",
+  opts:["Dehydration (elimination)","Hydration","Oxidation","Esterification"], a:0,
+  fact:"Heat the alcohol with a concentrated acid catalyst such as phosphoric acid. A molecule of water is removed."},
+ {cat:"Physics", q:"Which equation gives the energy of a single photon?",
+  opts:["E = hf","E = mc<sup>2</sup>","E = ½mv<sup>2</sup>","E = IVt"], a:0,
+  fact:"h is the Planck constant, 6.63 × 10<sup>−34</sup> J s, and f is the frequency of the light."},
+ {cat:"Psychology", q:"Bowlby said infants must form an attachment within a critical period. Roughly how long is it?",
+  opts:["6 months","2½ years","5 years","7 years"], a:1, keep:true,
+  fact:"Bowlby claimed that if no attachment formed by about 2½ years it would be very hard to form one later. Later researchers called it a 'sensitive' period."},
+ {cat:"Economics", q:"What does the Bank of England's Monetary Policy Committee set?",
+  opts:["Bank Rate (the base interest rate)","The rate of income tax","The rate of VAT","The National Minimum Wage"], a:0,
+  fact:"The nine-member committee sets Bank Rate to hit the government's 2% inflation target."},
+ {cat:"Cultural capital", q:"Who discovered penicillin in 1928?",
+  opts:["Alexander Fleming","Louis Pasteur","Marie Curie","Edward Jenner"], a:0,
+  fact:"Fleming noticed that mould on a culture plate at St Mary's Hospital, London, had killed the bacteria around it."},
+ {cat:"Sociology", q:"Talcott Parsons' 'warm bath' theory describes the role of which institution?",
+  opts:["The family","School","The media","The workplace"], a:0,
+  fact:"Parsons said the family relieves the stress of work for adults. Feminists argue it mainly describes a wife looking after her husband."},
+ {cat:"Geography", q:"What is the climate event called when trade winds weaken and warm water spreads east across the Pacific?",
+  opts:["El Niño","La Niña","A monsoon","A polar vortex"], a:0,
+  fact:"Peruvian fishermen named it 'the little boy' (the Christ child) because it often arrives around Christmas."},
+ {cat:"English Literature", q:"Who wrote <i>The Rime of the Ancient Mariner</i>?",
+  opts:["Samuel Taylor Coleridge","William Wordsworth","John Keats","William Blake"], a:0,
+  fact:"It opened <i>Lyrical Ballads</i> (1798), which Coleridge published jointly with Wordsworth."},
+ {cat:"Cultural capital", q:"Who composed <i>The Four Seasons</i>?",
+  opts:["Antonio Vivaldi","Johann Sebastian Bach","George Frideric Handel","Wolfgang Amadeus Mozart"], a:0,
+  fact:"Vivaldi published the four violin concertos in 1725. He was a priest, nicknamed 'the Red Priest' for his red hair."},
+ {cat:"History", q:"In the Cuban Missile Crisis of October 1962, Kennedy faced which Soviet leader?",
+  opts:["Nikita Khrushchev","Joseph Stalin","Leonid Brezhnev","Mikhail Gorbachev"], a:0,
+  fact:"The stand-off lasted 13 days. The USSR removed its missiles from Cuba, and the USA secretly agreed to remove its missiles from Turkey."},
+ {cat:"Cultural capital", q:"Almost 1,900 years after it was built, the Pantheon in Rome still holds which world record?",
+  opts:["The largest unreinforced concrete dome","The tallest Roman building still standing","The oldest working clock","The largest stone bridge"], a:0,
+  fact:"The dome is 43.3 m across, the same as its height from floor to top. The hole at the top, the oculus, is open to the sky."}
+];
+
+/* ============ ENGINE ============ */
+const $ = s => document.querySelector(s);
+const SHAPES = ["▲","◆","●","■"];
+let FORM = "", SECS = 30, idx = 0, score = 0, answers = [], order = [], locked = false, tick = null, left = 0;
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function plain(h){ const d=document.createElement("div"); d.innerHTML=h; return d.textContent; }
+
+// form select
+Object.entries(YEARS).forEach(([y,fs])=>{ const g=document.createElement("optgroup"); g.label=y;
+  fs.forEach(f=>{ const o=document.createElement("option"); o.value=f; o.textContent=f; g.appendChild(o); }); $("#formSel").appendChild(g); });
+const t=document.createElement("option"); t.value="TEST"; t.textContent="TEST (practice – not on the leaderboard)"; $("#formSel").appendChild(t);
+$("#formSel").onchange = e => { FORM=e.target.value; $("#goBtn").disabled=!FORM; checkExisting(); };
+$("#goBtn").onclick = start;
+
+async function pullForm(f){
+  const r = await fetch(CLOUD.endpoint+"?key="+encodeURIComponent(CLOUD.book+"::"+f+"::FORM"));
+  if(!r.ok) throw new Error("HTTP "+r.status);
+  const j = await r.json(); return (j && j.data) ? j.data : null;
+}
+async function checkExisting(){
+  $("#startHint").textContent="The score saves to the leaderboard automatically at the end.";
+  if(!FORM) return;
+  try{ const d=await pullForm(FORM); const w=d&&d.weeks&&d.weeks[QUIZ.id];
+    if(w) $("#startHint").innerHTML="⚠️ "+FORM+" already has a score for "+QUIZ.title+" ("+w.score+"/"+w.max+"). Playing again will replace it.";
+  }catch(e){ $("#startHint").textContent="Can't reach the leaderboard right now. You can still play; the score can be saved at the end."; }
+}
+
+function start(){
+  order = QUESTIONS.map(q => q.keep ? q.opts.map((_,i)=>i) : shuffle(q.opts.map((_,i)=>i)));
+  idx=0; score=0; answers=[];
+  $("#formPill").textContent=FORM; $("#formPill").hidden=false; $("#scorePill").hidden=false;
+  show("#sQ"); render();
+}
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); }
+
+function render(){
+  const q=QUESTIONS[idx]; locked=false;
+  $("#qCat").textContent=q.cat;
+  $("#qNum").textContent="Q"+(idx+1)+" / "+QUESTIONS.length;
+  $("#qProg").style.width=(idx/QUESTIONS.length*100)+"%";
+  $("#qText").innerHTML="<span>"+q.q+"</span>";
+  $("#scorePill").textContent=score+" pts";
+  const box=$("#opts"); box.innerHTML="";
+  order[idx].forEach((oi,pos)=>{
+    const b=document.createElement("button"); b.className="opt"; b.dataset.i=pos; b.dataset.oi=oi;
+    b.innerHTML='<span class="sh">'+SHAPES[pos]+'</span><span>'+q.opts[oi]+'</span>';
+    b.onclick=()=>choose(pos); box.appendChild(b);
+  });
+  $("#foot").innerHTML='<div class="fact hint">Click the form\'s answer (or press 1–4). Press R to reveal without an answer.</div>';
+  startTimer();
+}
+function startTimer(){
+  clearInterval(tick); const bar=$("#timerBar"), tm=$("#timer");
+  if(!SECS){ tm.style.visibility="hidden"; return; }
+  tm.style.visibility="visible"; tm.classList.remove("low"); left=SECS;
+  bar.style.transition="none"; bar.style.width="100%"; void bar.offsetWidth; bar.style.transition="width 1s linear";
+  tick=setInterval(()=>{ left--; bar.style.width=Math.max(0,left/SECS*100)+"%";
+    if(left<=5) tm.classList.add("low");
+    if(left<=0){ clearInterval(tick);
+      if(!locked){ choose(null); $("#foot .verdict").textContent="Time's up! Answer:"; } }
+  },1000);
+}
+function choose(pos){
+  if(locked) return; locked=true; clearInterval(tick);
+  const q=QUESTIONS[idx], btns=[...document.querySelectorAll(".opt")];
+  const pickedOi = pos==null ? null : +btns[pos].dataset.oi;
+  const right = pickedOi===q.a;
+  if(right) score++;
+  answers.push({n:idx+1, cat:q.cat, picked: pickedOi==null?null:plain(q.opts[pickedOi]), correct:right});
+  btns.forEach(b=>{ b.disabled=true; const oi=+b.dataset.oi;
+    if(oi===q.a) b.classList.add("right"); else b.classList.add("dim");
+    if(pos!=null && b===btns[pos] && !right){ b.classList.remove("dim"); b.classList.add("picked"); b.style.opacity=".55"; } });
+  $("#scorePill").textContent=score+" pts";
+  const last = idx===QUESTIONS.length-1;
+  $("#foot").innerHTML='<div class="verdict '+(right?'good':'bad')+'">'+(right?'Correct! +1':(pos==null?'Answer:':'Not this time'))+'</div>'+
+    '<div class="fact">'+q.fact+'</div><button class="btn" id="nextBtn">'+(last?'See final score':'Next')+' →</button>';
+  $("#nextBtn").onclick=next; $("#nextBtn").focus();
+}
+function next(){ if(!locked) return; idx++; if(idx>=QUESTIONS.length) finish(); else render(); }
+
+document.addEventListener("keydown",e=>{
+  if(!$("#sQ").classList.contains("on")) return;
+  if(["1","2","3","4"].includes(e.key)){ const p=+e.key-1; if(document.querySelectorAll(".opt")[p]) choose(p); }
+  else if(e.key.toLowerCase()==="r"){ choose(null); }
+  else if(e.key===" "||e.key==="Enter"){ e.preventDefault(); next(); }
+});
+
+function finish(){
+  clearInterval(tick); show("#sEnd");
+  $("#endForm").textContent=FORM+" · "+QUIZ.title;
+  $("#endScore").innerHTML=score+'<small> / '+QUESTIONS.length+'</small>';
+  $("#qProg").style.width="100%";
+  $("#review").innerHTML=answers.map(a=>'<div><b class="'+(a.correct?'ok-c':'no-c')+'">'+(a.correct?'✓':'✗')+'</b><span class="t">Q'+a.n+' · '+a.cat+
+    ' — '+QUESTIONS[a.n-1].q+'</span><span class="ans">'+QUESTIONS[a.n-1].opts[QUESTIONS[a.n-1].a]+'</span></div>').join("");
+  save();
+}
+async function save(){
+  const st=$("#saveStatus"); st.className="status"; st.textContent="Saving to the leaderboard…"; $("#retryBtn").hidden=true;
+  try{
+    let d = await pullForm(FORM) || {form:FORM, weeks:{}};
+    d.form=FORM; d.weeks=d.weeks||{};
+    d.weeks[QUIZ.id]={ term:QUIZ.term, week:QUIZ.week, title:QUIZ.title, score, max:QUESTIONS.length,
+                       answers, savedAt:new Date().toISOString() };
+    d.updated=new Date().toISOString();
+    const r=await fetch(CLOUD.endpoint,{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({key:CLOUD.book+"::"+FORM+"::FORM",cls:FORM,cand:"FORM",book:CLOUD.book,data:d,savedAt:d.updated})});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    st.className="status ok";
+    st.textContent = FORM==="TEST" ? "Practice run saved under TEST. It won't appear on the leaderboard."
+                                   : "✓ Saved. "+FORM+"'s score is now on the leaderboard.";
+  }catch(e){
+    st.className="status err"; st.textContent="Couldn't save (no connection?). Try again, or email the score to the quiz organiser.";
+    $("#retryBtn").hidden=false;
+  }
+}
+$("#retryBtn").onclick=save;
+$("#copyBtn").onclick=()=>{ const txt="Sixth Form Quiz · "+QUIZ.termName+" · "+QUIZ.title+" · "+FORM+" · "+score+"/"+QUESTIONS.length;
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>{$("#copyBtn").textContent="Copied ✓";},()=>{prompt("Copy this:",txt);}); };
+</script>
+</body>
+</html>
